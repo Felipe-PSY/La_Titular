@@ -6,7 +6,7 @@ import { useState } from 'react';
 const WHATSAPP_NUMBER = '3002099243'; // Cambiar por el número real
 
 export function Catalog() {
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   const navigate = useNavigate(); // Herramienta para redirigir a otras páginas programáticamente
   const [searchParams] = useSearchParams(); // Herramienta para leer variables en la URL (los "?nombre=valor")
 
@@ -87,57 +87,64 @@ export function Catalog() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {sortedProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              className="group flex flex-col"
-            >
-              <div
-                className="relative overflow-hidden aspect-square rounded-sm bg-gray-50 cursor-pointer"
-                onClick={() => handleBuyClick(product.id)}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-[#D00000]/20 border-t-[#D00000] rounded-full animate-spin mb-4" />
+            <p className="font-['Montserrat'] text-gray-500 animate-pulse uppercase tracking-widest text-[13px]">Buscando fragancias...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {sortedProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="group flex flex-col"
               >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
-                />
-                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/90 backdrop-blur-sm hidden md:block">
-                  <button className="w-full py-2 text-[10px] font-['Montserrat'] font-bold uppercase tracking-[0.2em] bg-black text-white hover:bg-[#D00000] transition-colors">
-                    Ver Detalles
-                  </button>
+                <div
+                  className="relative overflow-hidden aspect-square rounded-sm bg-gray-50 cursor-pointer"
+                  onClick={() => handleBuyClick(product.id)}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/90 backdrop-blur-sm hidden md:block">
+                    <button className="w-full py-2 text-[10px] font-['Montserrat'] font-bold uppercase tracking-[0.2em] bg-black text-white hover:bg-[#D00000] transition-colors">
+                      Ver Detalles
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="pt-4 pb-2 text-center md:text-left">
-                <h3 className="font-['Playfair_Display'] text-[15px] md:text-lg font-medium text-black mb-1 group-hover:text-[#D00000] transition-colors line-clamp-1">
-                  {product.name}
-                </h3>
-                {product.description && (
-                  <p className="font-['Montserrat'] text-[11px] text-gray-500 mb-2 uppercase tracking-widest line-clamp-1">
-                    {product.description}
-                  </p>
-                )}
-                <div className="flex flex-col items-center md:items-start">
-                  <span className="font-['Montserrat'] text-[14px] md:text-[16px] font-bold text-black group-hover:text-red-700 transition-colors">
-                    {formatPrice(product.price)}
-                  </span>
-                  <button
-                    onClick={() => handleBuyClick(product.id)}
-                    className="mt-3 md:hidden w-full border border-black py-2 text-[9px] font-['Montserrat'] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all"
-                  >
-                    Detalles
-                  </button>
+                <div className="pt-4 pb-2 text-center md:text-left">
+                  <h3 className="font-['Playfair_Display'] text-[15px] md:text-lg font-medium text-black mb-1 group-hover:text-[#D00000] transition-colors line-clamp-1">
+                    {product.name}
+                  </h3>
+                  {product.description && (
+                    <p className="font-['Montserrat'] text-[11px] text-gray-500 mb-2 uppercase tracking-widest line-clamp-1">
+                      {product.description}
+                    </p>
+                  )}
+                  <div className="flex flex-col items-center md:items-start">
+                    <span className="font-['Montserrat'] text-[14px] md:text-[16px] font-bold text-black group-hover:text-red-700 transition-colors">
+                      {formatPrice(product.price)}
+                    </span>
+                    <button
+                      onClick={() => handleBuyClick(product.id)}
+                      className="mt-3 md:hidden w-full border border-black py-2 text-[9px] font-['Montserrat'] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all"
+                    >
+                      Detalles
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
-        {filteredProducts.length === 0 && (
+        {!loading && filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <p className="font-['Montserrat'] text-gray-500 text-lg">
               No hay productos disponibles en este momento.

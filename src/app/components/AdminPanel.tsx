@@ -10,7 +10,7 @@ interface AdminPanelProps {
 
 export function AdminPanel({ onLogout }: AdminPanelProps = {}) {
   // Estas son las herramientas que nos da el ProductContext para leer y modificar la base de datos
-  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
 
   // Variables de Estado que controlan cómo se ve la interfaz en este momento:
   const [isModalOpen, setIsModalOpen] = useState(false); // ¿Está el menú de crear/editar abierto?
@@ -75,13 +75,15 @@ export function AdminPanel({ onLogout }: AdminPanelProps = {}) {
   };
 
   // Se ejecuta al hacer clic en "Guardar" o "Actualizar" dentro del Modal
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página intente recargarse al enviar el formulario
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     if (!formData.name || !formData.price || !formData.image) {
       toast.error('Por favor completa todos los campos requeridos');
       return;
     }
+
+    const toastId = toast.loading(editingProduct ? 'Actualizando...' : 'Agregando...');
 
     const productData = {
       name: formData.name,
@@ -91,24 +93,30 @@ export function AdminPanel({ onLogout }: AdminPanelProps = {}) {
       category: formData.category,
     };
 
-    if (editingProduct) {
-      // Si "editingProduct" no es nulo, significa que este producto ya existía, lo actualizamos.
-      updateProduct(editingProduct.id, productData);
-      toast.success('Producto actualizado correctamente');
-    } else {
-      // Si era nulo, significa que abrimos la ventana mediante "Agregar Producto".
-      addProduct(productData);
-      toast.success('Producto agregado correctamente');
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, productData);
+        toast.success('Producto actualizado correctamente', { id: toastId });
+      } else {
+        await addProduct(productData);
+        toast.success('Producto agregado correctamente', { id: toastId });
+      }
+      handleCloseModal();
+    } catch (error) {
+      toast.error('Ocurrió un error al procesar la solicitud', { id: toastId });
     }
-
-    handleCloseModal();
   };
 
   // Confirmación antes de borrar definitivamente
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (window.confirm(`¿Estás seguro de eliminar ${name}?`)) {
-      deleteProduct(id);
-      toast.success('Producto eliminado correctamente');
+      const toastId = toast.loading('Eliminando...');
+      try {
+        await deleteProduct(id);
+        toast.success('Producto eliminado correctamente', { id: toastId });
+      } catch (error) {
+        toast.error('Error al eliminar el producto', { id: toastId });
+      }
     }
   };
 
@@ -150,56 +158,63 @@ export function AdminPanel({ onLogout }: AdminPanelProps = {}) {
           </div>
 
           {/* Grilla principal donde se listan los productos en el admin */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="relative aspect-square overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-['Playfair_Display'] text-lg font-bold text-black mb-1">
-                    {product.name}
-                  </h3>
-                  {product.description && (
-                    <p className="font-['Montserrat'] text-sm text-gray-600 mb-2">
-                      {product.description}
-                    </p>
-                  )}
-                  <p className="font-['Montserrat'] text-xl font-bold text-[#D00000] mb-4">
-                    {formatPrice(product.price)}
-                  </p>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleOpenModal(product)}
-                      className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-['Montserrat'] font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Pencil className="w-4 h-4" />
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id, product.name)}
-                      className="flex-1 bg-red-600 text-white py-2 rounded-lg font-['Montserrat'] font-medium hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Eliminar</span>
-                    </button>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-[#D00000]/20 border-t-[#D00000] rounded-full animate-spin mb-4" />
+              <p className="font-['Montserrat'] text-gray-500 animate-pulse">Cargando productos...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="relative aspect-square overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  <div className="p-4">
+                    <h3 className="font-['Playfair_Display'] text-lg font-bold text-black mb-1">
+                      {product.name}
+                    </h3>
+                    {product.description && (
+                      <p className="font-['Montserrat'] text-sm text-gray-600 mb-2">
+                        {product.description}
+                      </p>
+                    )}
+                    <p className="font-['Montserrat'] text-xl font-bold text-[#D00000] mb-4">
+                      {formatPrice(product.price)}
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleOpenModal(product)}
+                        className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-['Montserrat'] font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id, product.name)}
+                        className="flex-1 bg-red-600 text-white py-2 rounded-lg font-['Montserrat'] font-medium hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Eliminar</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
-          {products.length === 0 && (
+          {!loading && products.length === 0 && (
             <div className="text-center py-12">
               <p className="font-['Montserrat'] text-gray-500 text-lg">
                 No hay productos. Agrega tu primer producto.

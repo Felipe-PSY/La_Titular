@@ -2,36 +2,54 @@ import { useState, useEffect } from 'react';
 import { AdminPanel } from '../components/AdminPanel';
 import { motion } from 'motion/react';
 import { Lock } from 'lucide-react';
+import { supabase } from '../supabaseClient';
+import { toast } from 'sonner';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Cambiado de username a email para Supabase Auth
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const authStatus = sessionStorage.getItem('adminAuth');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
+    // Verificar si ya hay una sesión activa al cargar la página
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAuthenticated(true);
+      }
+    };
+    checkSession();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'adminRM') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('adminAuth', 'true');
-      setError('');
-    } else {
-      setError('Credenciales incorrectas');
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        setIsAuthenticated(true);
+        toast.success('Sesión iniciada correctamente');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
-    setUsername('');
+    setEmail('');
     setPassword('');
-    sessionStorage.removeItem('adminAuth');
   };
 
   if (isAuthenticated) {
@@ -56,21 +74,22 @@ export default function Admin() {
         </div>
 
         <h1 className="font-['Playfair_Display'] text-3xl font-bold text-center text-black mb-2">
-          Acceso Restringido
+          Acceso Administrador
         </h1>
         <p className="font-['Montserrat'] text-gray-500 text-center text-sm mb-8">
-          Por favor ingresa tus credenciales de administrador
+          Ingresa con tu cuenta de Supabase para gestionar la tienda
         </p>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block font-['Montserrat'] text-sm font-medium text-gray-700 mb-2">
-              Usuario
+              Correo Electrónico
             </label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg font-['Montserrat'] focus:ring-2 focus:ring-[#D00000] focus:border-transparent transition-all outline-none"
               required
             />
@@ -89,21 +108,16 @@ export default function Admin() {
             />
           </div>
 
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="text-[#D00000] text-sm text-center font-['Montserrat'] font-medium"
-            >
-              {error}
-            </motion.div>
-          )}
-
           <button
             type="submit"
-            className="w-full bg-black text-white py-3.5 rounded-lg font-['Montserrat'] font-semibold tracking-wide hover:bg-[#D00000] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
+            disabled={loading}
+            className={`w-full bg-black text-white py-3.5 rounded-lg font-['Montserrat'] font-semibold tracking-wide transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200 flex items-center justify-center ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#D00000]'}`}
           >
-            INGRESAR
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            ) : (
+              'INGRESAR'
+            )}
           </button>
         </form>
       </motion.div>
