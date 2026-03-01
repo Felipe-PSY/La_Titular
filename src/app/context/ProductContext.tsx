@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../supabaseClient';
+import { toast } from 'sonner';
 
 // --- INTERFACES ---
 export interface Product {
@@ -33,6 +34,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      // Si no hay Supabase inicializado, simplemente devolvemos lista vacía
+      if (!supabase) {
+        setProducts([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -42,12 +49,17 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]); // Fallback
     } finally {
       setLoading(false);
     }
   };
 
   const addProduct = async (product: Omit<Product, 'id'>) => {
+    if (!supabase) {
+      toast.error('La base de datos no está conectada.');
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('products')
@@ -58,11 +70,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       if (data) setProducts([...data, ...products]);
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Error al añadir producto. Verifica tu conexión.');
+      toast.error('Error al añadir producto. Verifica tu conexión.');
     }
   };
 
   const updateProduct = async (id: string, product: Omit<Product, 'id'>) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('products')
@@ -77,6 +90,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteProduct = async (id: string) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('products')

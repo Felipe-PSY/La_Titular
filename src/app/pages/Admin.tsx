@@ -14,9 +14,14 @@ export default function Admin() {
   useEffect(() => {
     // Verificar si ya hay una sesión activa al cargar la página
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsAuthenticated(true);
+      if (!supabase) return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setIsAuthenticated(true);
+        }
+      } catch (e) {
+        console.error('Error al obtener sesión:', e);
       }
     };
     checkSession();
@@ -24,6 +29,10 @@ export default function Admin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) {
+      toast.error('La base de datos no está configurada aún.');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -46,7 +55,9 @@ export default function Admin() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
     setIsAuthenticated(false);
     setEmail('');
     setPassword('');
