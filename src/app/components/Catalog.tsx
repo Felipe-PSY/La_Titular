@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { useState } from 'react';
 
-const WHATSAPP_NUMBER = '3192203782'; // Cambiar por el número real
+const WHATSAPP_NUMBER = ''; // Cambiar por el número real
 
 export function Catalog() {
   const { products, loading } = useProducts();

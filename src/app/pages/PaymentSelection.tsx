@@ -3,7 +3,7 @@ import { useProducts } from '../context/ProductContext';
 import { motion } from 'motion/react';
 import { CreditCard, Banknote, Smartphone, Building2, ArrowLeft } from 'lucide-react';
 
-const WHATSAPP_NUMBER = '573002099243'; // Cambiar por el número real
+const WHATSAPP_NUMBER = '3192203782'; // Cambiar por el número real
 
 interface PaymentMethod {
   name: string;
