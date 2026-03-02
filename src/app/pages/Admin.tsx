@@ -88,7 +88,7 @@ export default function Admin() {
           Acceso Administrador
         </h1>
         <p className="font-['Montserrat'] text-gray-500 text-center text-sm mb-8">
-          Ingresa con tu cuenta de Supabase para gestionar la tienda
+          Ingrese sus credenciales para gestionar la tienda
         </p>
 
         <form onSubmit={handleLogin} className="space-y-6">
