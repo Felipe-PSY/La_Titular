@@ -13,6 +13,11 @@ export function Catalog() {
   // Obtenemos si la URL tiene "?category=men" o "?category=women"
   const categoryParam = searchParams.get('category');
 
+  // Ajustamos el título promocional dependiendo de la categoría seleccionada en la URL
+  let catalogTitle = 'Nuestro Catálogo';
+  if (categoryParam === 'women') catalogTitle = 'Catálogo Femenino';
+  if (categoryParam === 'men') catalogTitle = 'Catálogo Masculino';
+
   const handleBuyClick = (productId: string) => {
     navigate(`/pago/${productId}`);
   };
@@ -29,16 +34,12 @@ export function Catalog() {
   // Variable de estado que guarda el criterio de ordenamiento seleccionado por el usuario.
   const [sortOrder, setSortOrder] = useState<'default' | 'asc' | 'desc'>('default');
 
-  // Variable de estado para el filtro de categoría local (complementa el parámetro de URL)
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'women' | 'men'>(
-    categoryParam === 'women' ? 'women' : categoryParam === 'men' ? 'men' : 'all'
-  );
-
-  // PASO 1: Filtrar la lista total de productos basándonos en la categoría activa
-  const activeCategory = categoryFilter;
+  // PASO 1: Filtrar la lista total de productos basándonos en la categoría
   const filteredProducts = products.filter(product => {
-    if (activeCategory === 'all') return true;
-    return product.category === activeCategory || product.category === 'unisex';
+    // Si no hay parámetro en la URL, los mostramos todos
+    if (!categoryParam) return true;
+    // Si el producto es "unisex", se muestra siempre. Si no, debe coincidir con la categoría de la URL.
+    return product.category === categoryParam || product.category === 'unisex';
   });
 
   // PASO 2: Ordenar los productos filtrados según el precio
@@ -47,11 +48,6 @@ export function Catalog() {
     if (sortOrder === 'desc') return b.price - a.price; // Mayor a menor precio
     return 0; // Orden "Default" (como fueron agregados)
   });
-
-  // Título dinámico según el filtro activo
-  let catalogTitle = 'Nuestro Catálogo';
-  if (activeCategory === 'women') catalogTitle = 'Catálogo Femenino';
-  if (activeCategory === 'men') catalogTitle = 'Catálogo Masculino';
 
   return (
     <section className="py-16 sm:py-20 bg-white">
@@ -71,29 +67,8 @@ export function Catalog() {
           </p>
         </motion.div>
 
-        {/* Barra de Filtros */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
-          {/* Filtro de Categoría */}
-          <div className="flex items-center gap-0 border-b border-gray-200">
-            {(['all', 'women', 'men'] as const).map((cat) => {
-              const label = cat === 'all' ? 'Todos' : cat === 'women' ? 'Femenino' : 'Masculino';
-              const isActive = categoryFilter === cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat)}
-                  className={`px-5 py-2 font-['Montserrat'] text-[12px] uppercase tracking-widest transition-all border-b-2 -mb-px ${isActive
-                    ? 'border-[#D00000] text-[#D00000] font-semibold'
-                    : 'border-transparent text-gray-500 hover:text-black'
-                    }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Ordenamiento por Precio */}
+        {/* Filtrado / Ordenamiento */}
+        <div className="flex justify-end mb-10">
           <div className="relative">
             <select
               className="appearance-none border-b border-gray-300 px-4 py-2 pr-10 font-['Montserrat'] text-[13px] text-gray-800 bg-transparent focus:outline-none focus:border-[#D00000] cursor-pointer hover:border-gray-500 transition-colors uppercase tracking-widest"

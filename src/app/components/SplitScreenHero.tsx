@@ -6,7 +6,7 @@ export function SplitScreenHero() {
         <div className="relative w-full min-h-screen flex flex-col md:flex-row">
             {/* Centered Minimalist Navigation Menu */}
             <nav className="absolute top-0 left-0 right-0 z-50 py-6 px-4 pointer-events-auto">
-                <div className="relative flex items-center justify-between w-full max-w-3xl mx-auto hidden md:flex">
+                <div className="relative items-center justify-between w-full max-w-3xl mx-auto hidden md:flex">
                     {/* Left Links */}
                     <div className="flex space-x-12 flex-1 justify-end pr-12">
                         <Link to="/" className="text-white hover:text-[#D4AF37] text-sm font-['Montserrat'] uppercase tracking-[0.2em] transition-colors whitespace-nowrap">Inicio</Link>
