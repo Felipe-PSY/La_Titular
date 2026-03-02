@@ -71,7 +71,7 @@ export function Footer() {
             <ul className="space-y-4 font-['Montserrat'] text-gray-300">
               <li className="flex items-start space-x-3">
                 <Package className="w-5 h-5 text-[#D00000] flex-shrink-0 mt-0.5" />
-                <span>Envíos a toda Colombia</span>
+                <span>Envíos gratuitos a toda Colombia</span>
               </li>
             </ul>
           </div>
