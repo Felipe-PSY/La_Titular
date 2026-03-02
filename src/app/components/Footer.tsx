@@ -41,11 +41,11 @@ export function Footer() {
             <ul className="space-y-4 font-['Montserrat'] text-gray-300">
               <li className="flex items-start space-x-3">
                 <Phone className="w-5 h-5 text-[#D00000] flex-shrink-0 mt-0.5" />
-                <span>3002099243</span>
+                <span>3192203782</span>
               </li>
               <li className="flex items-start space-x-3">
                 <Mail className="w-5 h-5 text-[#D00000] flex-shrink-0 mt-0.5" />
-                <span>info@perfumerialatitular.com</span>
+                <span>Latitularr3@gmail.com</span>
               </li>
             </ul>
           </div>
