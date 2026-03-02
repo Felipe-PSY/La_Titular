@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react';
 
-const WHATSAPP_NUMBER = '3002099243'; // Cambiar por el número real
+const WHATSAPP_NUMBER = '3192203782'; // Cambiar por el número real
 
 export default function Contact() {
   const handleWhatsAppClick = () => {
@@ -58,7 +58,7 @@ export default function Contact() {
                       Teléfono
                     </h3>
                     <p className="font-['Montserrat'] text-gray-600">
-                      3002099243
+                      3192203782
                     </p>
                   </div>
                 </div>
@@ -72,7 +72,7 @@ export default function Contact() {
                       Email
                     </h3>
                     <p className="font-['Montserrat'] text-gray-600">
-                      info@perfumerialatitular.com
+                      Latitularr3@gmail.com
                     </p>
                   </div>
                 </div>
@@ -86,7 +86,7 @@ export default function Contact() {
                       Ubicación
                     </h3>
                     <p className="font-['Montserrat'] text-gray-600">
-                      Bogotá, Colombia
+                      Santa Marta, Magdalena
                     </p>
                   </div>
                 </div>
@@ -103,7 +103,7 @@ export default function Contact() {
                       Lunes a Sábado: 9:00 AM - 7:00 PM
                     </p>
                     <p className="font-['Montserrat'] text-gray-600">
-                      Domingo: 10:00 AM - 4:00 PM
+                      Domingo: 8:00 AM - 12:00 PM
                     </p>
                   </div>
                 </div>
